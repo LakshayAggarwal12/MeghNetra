@@ -1,0 +1,6 @@
+{
+  "severe": ["severe", "extreme", "evacuate", "evacuation", "trapped", "record-breaking", "record breaking", "catastrophic", "life-threatening", "deadly", "devastating", "emergency", "collapsed", "swept away", "rescue"],
+  "high": ["heavy", "major", "significant", "widespread", "intense", "dangerous", "warning issued", "disrupted", "damaged", "stranded", "submerged"],
+  "moderate": ["moderate", "considerable", "noticeable", "affecting", "expected", "likely", "forecast"],
+  "low": ["light", "mild", "minor", "slight", "brief", "scattered", "isolated", "patchy"]
+}

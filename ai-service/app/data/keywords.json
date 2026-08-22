@@ -1,0 +1,11 @@
+{
+  "flooding": ["flood", "flooding", "flooded", "waterlogging", "waterlogged", "inundat", "submerged", "overflowing drain", "swamped", "deluge"],
+  "rainfall": ["rain", "rainfall", "downpour", "drizzle", "showers", "monsoon", "precipitation", "wet spell"],
+  "thunderstorm": ["thunderstorm", "lightning", "thunder", "lightning strike", "hailstorm", "hail"],
+  "heatwave": ["heatwave", "heat wave", "extreme heat", "scorching", "record temperature", "sunstroke", "sweltering"],
+  "fog": ["fog", "foggy", "mist", "low visibility", "haze"],
+  "dust_storm": ["dust storm", "duststorm", "sandstorm", "dust haze", "dust cloud"],
+  "strong_wind": ["strong wind", "high wind", "gusty wind", "gale", "windstorm", "squall"],
+  "cyclone": ["cyclone", "hurricane", "typhoon", "tropical storm", "cyclonic"],
+  "other": []
+}
