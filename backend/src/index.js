@@ -15,6 +15,7 @@ const eventsRoutes = require("./routes/events.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const adminRoutes = require("./routes/admin.routes");
 const sourcesRoutes = require("./routes/sources.routes");
+const searchRoutes = require("./routes/search.routes");
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +34,7 @@ app.use("/api/events", eventsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/sources", sourcesRoutes);
+app.use("/api/search", searchRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

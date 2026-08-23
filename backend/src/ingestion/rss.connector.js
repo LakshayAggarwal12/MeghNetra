@@ -71,4 +71,47 @@ async function pollAllFeeds(feedUrls) {
   }
 }
 
-module.exports = { pollAllFeeds, isWeatherRelated };
+/**
+ * On-demand city search (used by the new city-lookup feature): searches the
+ * configured RSS feeds for items mentioning the given city by name, without
+ * requiring the item to already match the general weather-keyword filter
+ * used by the scheduled poll — the caller explicitly wants "everything
+ * about this city" from the news feeds, and downstream classification will
+ * still correctly categorize (or discard as low-relevance) whatever comes
+ * back. Bypasses the seenItems dedupe too, since a user-initiated search
+ * should surface a matching item even if the scheduled poll already saw it.
+ * Returns the list of matched items (does NOT enqueue them itself — the
+ * caller decides which of the returned candidates to enqueue).
+ */
+async function searchFeedsForCity(cityName, feedUrls) {
+  const matches = [];
+  const cityLower = cityName.trim().toLowerCase();
+  if (!cityLower) return matches;
+
+  for (const url of feedUrls) {
+    let feed;
+    try {
+      feed = await parser.parseURL(url);
+    } catch (err) {
+      logger.error(`City search: failed to fetch/parse ${url}:`, err.message);
+      continue;
+    }
+
+    for (const item of feed.items || []) {
+      const text = [item.title, item.contentSnippet].filter(Boolean).join(" — ");
+      if (text.toLowerCase().includes(cityLower)) {
+        matches.push({
+          title: item.title,
+          contentSnippet: item.contentSnippet,
+          isoDate: item.isoDate,
+          link: item.link,
+          feedUrl: url,
+        });
+      }
+    }
+  }
+
+  return matches;
+}
+
+module.exports = { pollAllFeeds, isWeatherRelated, searchFeedsForCity };

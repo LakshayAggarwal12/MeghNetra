@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { SendHorizontal, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import client from "../api/client";
 
 export default function CitizenReport() {
@@ -26,23 +26,23 @@ export default function CitizenReport() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6">
-      <Link to="/" className="text-sm text-meghteal underline">
-        ← Back to dashboard
-      </Link>
-
-      <h1 className="text-xl font-bold text-meghblue mt-2 mb-1">Submit a Weather Report</h1>
-      <p className="text-sm text-gray-500 mb-4">
+    <div className="max-w-xl mx-auto animate-fade-in">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
         Describe what you're observing — flooding, heavy rain, strong winds, fog, or any other severe
         weather. Your report will be automatically classified, geolocated, and cross-checked against
         other sources.
       </p>
 
-      <form onSubmit={submit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 space-y-4">
+      <form
+        onSubmit={submit}
+        className="bg-white dark:bg-meghcard-dark rounded-xl shadow-card border border-slate-200 dark:border-slate-700 p-5 space-y-4 transition-surface"
+      >
         <div>
-          <label className="text-xs text-gray-500 block mb-1">What are you observing?</label>
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1.5">What are you observing?</label>
           <textarea
-            className="w-full border rounded px-3 py-2 text-sm"
+            className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
+                       text-slate-800 dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-meghteal transition-surface resize-none"
             rows={4}
             placeholder="e.g. Heavy flooding in Sector 62, Noida — roads are submerged"
             value={text}
@@ -52,9 +52,13 @@ export default function CitizenReport() {
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">City / locality (optional but helps accuracy)</label>
+          <label className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1.5">
+            City / locality (optional but helps accuracy)
+          </label>
           <input
-            className="w-full border rounded px-3 py-2 text-sm"
+            className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
+                       text-slate-800 dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-meghteal transition-surface"
             placeholder="e.g. Noida"
             value={locationHint}
             onChange={(e) => setLocationHint(e.target.value)}
@@ -63,19 +67,27 @@ export default function CitizenReport() {
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="bg-meghblue text-white text-sm px-4 py-2 rounded hover:bg-meghteal disabled:opacity-50"
+          className="flex items-center gap-2 bg-meghblue text-white text-sm font-medium px-4 py-2.5 rounded-lg
+                     hover:bg-meghteal disabled:opacity-50 transition-surface"
         >
+          {status === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendHorizontal className="w-4 h-4" />}
           {status === "submitting" ? "Submitting…" : "Submit Report"}
         </button>
 
         {status === "done" && (
-          <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded p-3">
-            Report received (ID: {reportId?.slice(0, 8)}…) and queued for processing. It will appear on
-            the dashboard within a few seconds once classified and verified.
+          <div className="flex items-start gap-2 text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 animate-fade-in">
+            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>
+              Report received (ID: {reportId?.slice(0, 8)}…) and queued for processing. It will appear on
+              the dashboard within a few seconds once classified and verified.
+            </span>
           </div>
         )}
         {status === "error" && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{errorMsg}</div>
+          <div className="flex items-start gap-2 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 animate-fade-in">
+            <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+            {errorMsg}
+          </div>
         )}
       </form>
     </div>

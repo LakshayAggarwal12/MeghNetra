@@ -12,34 +12,22 @@ const logger = require("../utils/logger");
  *    venue's network is unreliable.
  * The adapter boundary (weatherApiAdapter) is identical either way, so
  * nothing downstream in the pipeline needed to change.
+ *
+ * DEDUPE STRATEGY: the previous version re-fetched every city on every poll
+ * cycle, which meant the same city could be re-enqueued every
+ * WEATHER_POLL_INTERVAL_SECONDS even when conditions hadn't changed,
+ * producing near-duplicate reports/events. This version tracks a per-city
+ * "last fetched" timestamp in memory and skips a city until
+ * WEATHER_CITY_COOLDOWN_MINUTES has elapsed since it was last fetched by
+ * the SCHEDULED poll. On-demand lookups (fetchCityOnDemand, used by the new
+ * city-search feature) intentionally bypass this cooldown, since a user
+ * explicitly asking for a city wants fresh data regardless of the schedule.
  */
 
 const CITY_POOL = [
   "Delhi", "Mumbai", "Chennai", "Kolkata", "Bengaluru", "Hyderabad",
   "Jaipur", "Guwahati", "Patna", "Lucknow", "Pune", "Ahmedabad",
-  "Bhubaneswar", "Chandigarh", "Nagpur","Thiruvananthapuram",
-  "Bhopal",
-  "Ranchi",
-  "Raipur",
-  "Dehradun",
-  "Shimla",
-  "Srinagar",
-  "Jammu",
-  "Panaji",
-  "Gandhinagar",
-  "Kochi",
-  "Vijayawada",
-  "Visakhapatnam",
-  "Bhubaneswar",
-  "Cuttack",
-  "Agartala",
-  "Imphal",
-  "Shillong",
-  "Aizawl",
-  "Kohima",
-  "Itanagar",
-  "Gangtok",
-  "Dispur"
+  "Bhubaneswar", "Chandigarh", "Nagpur",
 ];
 
 const SCENARIOS = [
@@ -58,26 +46,31 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-async function pollSimulated() {
-  const numCities = 1 + Math.floor(Math.random() * 3);
-  const cities = [...CITY_POOL].sort(() => 0.5 - Math.random()).slice(0, numCities);
+// city (lowercase) -> ms timestamp last fetched by the SCHEDULED poll.
+const lastFetchedAt = new Map();
 
-  for (const city of cities) {
-    const pool = Math.random() < 0.8 ? SCENARIOS.filter((s) => s.category !== "clear") : SCENARIOS;
-    const scenario = pick(pool);
+function isOnCooldown(city) {
+  const last = lastFetchedAt.get(city.toLowerCase());
+  if (!last) return false;
+  const cooldownMs = env.WEATHER_CITY_COOLDOWN_MINUTES * 60 * 1000;
+  return Date.now() - last < cooldownMs;
+}
 
-    try {
-      const canonical = weatherApiAdapter({
-        city,
-        description: scenario.text(city),
-        windSpeedKmh: scenario.wind,
-        rainfallMm: scenario.rain,
-      });
-      await enqueueReport(canonical);
-    } catch (err) {
-      logger.error(`Weather API connector (simulated) failed for ${city}:`, err.message);
-    }
-  }
+function markFetched(city) {
+  lastFetchedAt.set(city.toLowerCase(), Date.now());
+}
+
+async function fetchSimulatedCity(city) {
+  const pool = Math.random() < 0.8 ? SCENARIOS.filter((s) => s.category !== "clear") : SCENARIOS;
+  const scenario = pick(pool);
+
+  const canonical = weatherApiAdapter({
+    city,
+    description: scenario.text(city),
+    windSpeedKmh: scenario.wind,
+    rainfallMm: scenario.rain,
+  });
+  return enqueueReport(canonical);
 }
 
 /**
@@ -98,39 +91,78 @@ function describeConditions(city, owmData) {
   return { sentence, windKmh, rainMm };
 }
 
-async function pollOpenWeatherMap() {
-  for (const city of CITY_POOL) {
+async function fetchOpenWeatherMapCity(city) {
+  const { data } = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
+    params: { q: `${city},IN`, appid: env.WEATHER_API_KEY, units: "metric" },
+    timeout: 8000,
+  });
+
+  const { sentence, windKmh, rainMm } = describeConditions(city, data);
+
+  const canonical = weatherApiAdapter({
+    city,
+    description: sentence,
+    windSpeedKmh: windKmh,
+    rainfallMm: rainMm,
+  });
+  const reportId = await enqueueReport(canonical);
+  return { reportId, sentence, windKmh, rainMm, raw: data };
+}
+
+/**
+ * Scheduled poll: iterates the fixed city pool, skipping any city still
+ * within its cooldown window so the same city isn't re-enqueued every cycle.
+ */
+async function pollWeatherApi() {
+  const useReal = env.WEATHER_API_PROVIDER === "openweathermap" && env.WEATHER_API_KEY;
+  if (env.WEATHER_API_PROVIDER === "openweathermap" && !env.WEATHER_API_KEY) {
+    logger.warn("WEATHER_API_PROVIDER=openweathermap but WEATHER_API_KEY is not set — falling back to simulated data.");
+  }
+
+  const citiesDue = CITY_POOL.filter((c) => !isOnCooldown(c));
+  if (citiesDue.length === 0) {
+    logger.info(`Weather API poll: all ${CITY_POOL.length} cities on cooldown (${env.WEATHER_CITY_COOLDOWN_MINUTES}min) — skipping this cycle.`);
+    return;
+  }
+
+  // Simulated mode still only samples 1-3 cities per cycle (keeps demo pace
+  // similar to before); real mode fetches every due city each cycle.
+  const citiesThisCycle = useReal
+    ? citiesDue
+    : [...citiesDue].sort(() => 0.5 - Math.random()).slice(0, 1 + Math.floor(Math.random() * 3));
+
+  for (const city of citiesThisCycle) {
     try {
-      const { data } = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
-        params: { q: `${city},IN`, appid: env.WEATHER_API_KEY, units: "metric" },
-        timeout: 8000,
-      });
-
-      const { sentence, windKmh, rainMm } = describeConditions(city, data);
-
-      const canonical = weatherApiAdapter({
-        city,
-        description: sentence,
-        windSpeedKmh: windKmh,
-        rainfallMm: rainMm,
-      });
-      await enqueueReport(canonical);
+      if (useReal) {
+        await fetchOpenWeatherMapCity(city);
+      } else {
+        await fetchSimulatedCity(city);
+      }
+      markFetched(city);
     } catch (err) {
       const detail = err.response ? `${err.response.status} ${JSON.stringify(err.response.data)}` : err.message;
-      logger.error(`OpenWeatherMap fetch failed for ${city}:`, detail);
-      // Never let one city's failure stop the rest of the poll cycle.
+      logger.error(`Weather API connector failed for ${city}:`, detail);
+      // Do not mark as fetched on failure, so it will be retried next cycle
+      // rather than sitting on a cooldown for data it never actually got.
     }
   }
 }
 
-async function pollWeatherApi() {
+/**
+ * On-demand lookup for the new city-search feature (bypasses cooldown —
+ * a user explicitly asking for a city wants current data now). Returns the
+ * enqueued report info directly so the caller can respond immediately,
+ * without waiting for the async pipeline to finish classifying it.
+ */
+async function fetchCityOnDemand(city) {
   if (env.WEATHER_API_PROVIDER === "openweathermap" && env.WEATHER_API_KEY) {
-    return pollOpenWeatherMap();
+    const result = await fetchOpenWeatherMapCity(city);
+    markFetched(city); // still records it, so the next SCHEDULED poll respects the cooldown too
+    return { mode: "openweathermap", ...result };
   }
-  if (env.WEATHER_API_PROVIDER === "openweathermap" && !env.WEATHER_API_KEY) {
-    logger.warn("WEATHER_API_PROVIDER=openweathermap but WEATHER_API_KEY is not set — falling back to simulated data.");
-  }
-  return pollSimulated();
+  await fetchSimulatedCity(city);
+  markFetched(city);
+  return { mode: "simulated" };
 }
 
-module.exports = { pollWeatherApi };
+module.exports = { pollWeatherApi, fetchCityOnDemand };

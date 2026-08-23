@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { TrendingUp } from "lucide-react";
 import client from "../../api/client";
+import { useSettings } from "../../context/SettingsContext";
 
 const COLORS: Record<string, string> = {
   rainfall: "#3b82f6",
@@ -16,6 +18,9 @@ const COLORS: Record<string, string> = {
 
 export default function TrendChart() {
   const [data, setData] = useState<any[]>([]);
+  const { theme } = useSettings();
+  const axisColor = theme === "dark" ? "#94a3b8" : "#64748b";
+  const gridColor = theme === "dark" ? "#334155" : "#e2e8f0";
 
   useEffect(() => {
     client
@@ -33,17 +38,28 @@ export default function TrendChart() {
   const categories = Object.keys(COLORS);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <h3 className="text-sm font-semibold text-meghblue mb-2">Event Trend (last 7 days)</h3>
+    <div className="bg-white dark:bg-meghcard-dark rounded-xl shadow-card border border-slate-200 dark:border-slate-700 p-4 transition-surface">
+      <div className="flex items-center gap-2 mb-3">
+        <TrendingUp className="w-4 h-4 text-meghteal" />
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Event Trend (last 7 days)</h3>
+      </div>
       <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" tick={{ fontSize: 11 }} />
-          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-          <Tooltip />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+          <XAxis dataKey="time" tick={{ fontSize: 11, fill: axisColor }} />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: axisColor }} />
+          <Tooltip
+            contentStyle={{
+              background: theme === "dark" ? "#1e293b" : "#ffffff",
+              border: "1px solid " + gridColor,
+              borderRadius: 8,
+              fontSize: 12,
+              color: theme === "dark" ? "#f1f5f9" : "#0f172a",
+            }}
+          />
           <Legend wrapperStyle={{ fontSize: 11 }} />
           {categories.map((cat) => (
-            <Bar key={cat} dataKey={cat} stackId="a" fill={COLORS[cat]} />
+            <Bar key={cat} dataKey={cat} stackId="a" fill={COLORS[cat]} radius={[2, 2, 0, 0]} />
           ))}
         </BarChart>
       </ResponsiveContainer>

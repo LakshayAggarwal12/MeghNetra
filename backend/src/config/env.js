@@ -45,6 +45,9 @@ const env = {
     .map((s) => s.trim())
     .filter(Boolean),
   RSS_POLL_INTERVAL_SECONDS: parseInt(process.env.RSS_POLL_INTERVAL_SECONDS || "300", 10),
+  // Minimum minutes between scheduled re-fetches of the SAME city, to stop
+  // near-duplicate reports/events piling up from repeated polling.
+  WEATHER_CITY_COOLDOWN_MINUTES: parseInt(process.env.WEATHER_CITY_COOLDOWN_MINUTES || "30", 10),
   // Real weather API (OpenWeatherMap). Empty key = simulated data is used instead.
   WEATHER_API_KEY: loadWeatherApiKey(),
   WEATHER_API_PROVIDER: process.env.WEATHER_API_PROVIDER || "simulated",

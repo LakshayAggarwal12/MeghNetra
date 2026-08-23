@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { LogOut, ClipboardList, ScrollText, LockKeyhole } from "lucide-react";
 import client from "../api/client";
 import { getSocket } from "../sockets/socket";
 import ReportQueueTable from "../components/admin/ReportQueueTable";
@@ -23,27 +23,38 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-16 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h1 className="text-lg font-bold text-meghblue mb-4">Admin Login</h1>
+    <div className="max-w-sm mx-auto mt-8 bg-white dark:bg-meghcard-dark rounded-xl shadow-card
+                    border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-2 rounded-lg bg-meghblue/10 dark:bg-sky-400/10 text-meghblue dark:text-sky-300">
+          <LockKeyhole className="w-5 h-5" />
+        </div>
+        <h1 className="text-lg font-bold text-meghblue dark:text-sky-300">Admin Login</h1>
+      </div>
       <form onSubmit={submit} className="space-y-3">
         <input
-          className="w-full border rounded px-3 py-2 text-sm"
+          className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
+                     text-slate-800 dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-meghteal transition-surface"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          className="w-full border rounded px-3 py-2 text-sm"
+          className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800
+                     text-slate-800 dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-meghteal transition-surface"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {error && <div className="text-xs text-red-600">{error}</div>}
-        <button className="w-full bg-meghblue text-white text-sm px-3 py-2 rounded hover:bg-meghteal">
+        {error && <div className="text-xs text-red-500">{error}</div>}
+        <button className="w-full bg-meghblue text-white text-sm font-medium px-3 py-2.5 rounded-lg
+                           hover:bg-meghteal transition-surface">
           Log in
         </button>
-        <p className="text-xs text-gray-400">Demo credentials: admin@meghnetra.in / admin123</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-center">Demo credentials: admin@meghnetra.in / admin123</p>
       </form>
     </div>
   );
@@ -77,68 +88,70 @@ function AdminQueue() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-4">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold text-meghblue">MEGHNETRA Admin Panel</h1>
-          <p className="text-sm text-gray-500">Human-in-the-loop verification & audit</p>
-        </div>
-        <div className="flex gap-3 items-center">
-          <Link to="/" className="text-sm text-meghteal underline">
-            ← Public Dashboard
-          </Link>
-          <button onClick={logout} className="text-sm text-red-600 underline">
-            Log out
-          </button>
-        </div>
-      </header>
+    <div className="max-w-5xl mx-auto space-y-4 animate-fade-in">
+      <div className="flex justify-end">
+        <button
+          onClick={logout}
+          className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 transition-surface"
+        >
+          <LogOut className="w-3.5 h-3.5" /> Log out
+        </button>
+      </div>
 
       <div className="flex gap-2">
         <button
           onClick={() => setTab("queue")}
-          className={`px-3 py-1.5 text-sm rounded ${tab === "queue" ? "bg-meghblue text-white" : "bg-white border"}`}
+          className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-surface ${
+            tab === "queue"
+              ? "bg-meghblue text-white shadow-card"
+              : "bg-white dark:bg-meghcard-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+          }`}
         >
-          Review Queue ({queue.length})
+          <ClipboardList className="w-4 h-4" /> Review Queue ({queue.length})
         </button>
         <button
           onClick={() => setTab("audit")}
-          className={`px-3 py-1.5 text-sm rounded ${tab === "audit" ? "bg-meghblue text-white" : "bg-white border"}`}
+          className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-surface ${
+            tab === "audit"
+              ? "bg-meghblue text-white shadow-card"
+              : "bg-white dark:bg-meghcard-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+          }`}
         >
-          Audit Log
+          <ScrollText className="w-4 h-4" /> Audit Log
         </button>
       </div>
 
       {tab === "queue" && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-meghcard-dark rounded-xl shadow-card border border-slate-200 dark:border-slate-700 p-2">
           <ReportQueueTable queue={queue} />
         </div>
       )}
 
       {tab === "audit" && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="bg-white dark:bg-meghcard-dark rounded-xl shadow-card border border-slate-200 dark:border-slate-700 p-4">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-gray-500 border-b">
-                <th className="py-2">Time</th>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Target</th>
+              <tr className="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700 uppercase tracking-wide">
+                <th className="py-2 px-2">Time</th>
+                <th className="px-2">Actor</th>
+                <th className="px-2">Action</th>
+                <th className="px-2">Target</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b last:border-0">
-                  <td className="py-2 text-xs">{new Date(log.timestamp).toLocaleString()}</td>
-                  <td className="text-xs">{log.actor}</td>
-                  <td className="text-xs font-medium">{log.action}</td>
-                  <td className="text-xs">
+                <tr key={log.id} className="border-b last:border-0 border-slate-100 dark:border-slate-800">
+                  <td className="py-2.5 px-2 text-xs text-slate-500 dark:text-slate-400">{new Date(log.timestamp).toLocaleString()}</td>
+                  <td className="px-2 text-xs text-slate-600 dark:text-slate-300">{log.actor}</td>
+                  <td className="px-2 text-xs font-medium text-meghteal dark:text-sky-300">{log.action}</td>
+                  <td className="px-2 text-xs text-slate-500 dark:text-slate-400">
                     {log.target_type} {log.target_id.slice(0, 8)}…
                   </td>
                 </tr>
               ))}
               {logs.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-gray-400 text-xs">
+                  <td colSpan={4} className="py-8 text-center text-slate-400 text-xs">
                     No audit entries yet.
                   </td>
                 </tr>
