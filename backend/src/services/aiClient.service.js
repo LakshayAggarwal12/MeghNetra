@@ -29,6 +29,8 @@ async function post(path, body) {
 }
 
 module.exports = {
+  normalize: (raw_text, source, timestamp, structured_category) =>
+    post("/normalize", { raw_text, source, timestamp, structured_category }),
   classify: (text) => post("/classify", { text }),
   severity: (text, category, wind_speed_kmh, rainfall_mm) =>
     post("/severity", { text, category, wind_speed_kmh, rainfall_mm }),

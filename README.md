@@ -66,14 +66,46 @@ This build follows a deliberately **trimmed, demo-reliable** scope — see
   plausible weather conditions for a rotating set of Indian cities) rather
   than calling a real external API — again, for demo reliability. The
   adapter boundary is identical to what a real integration would use.
-- RSS ingestion, event-merge UI, and per-report suspicious-flagging are
-  documented but not wired into the UI in this build — the underlying data
-  model supports them.
+- RSS ingestion and event-merge UI are documented but not wired into the UI
+  in this build — the underlying data model supports them.
 
 Every one of these is a documented, defensible simplification for a 2-day
 build, not a missing understanding of the full design (see the companion
 `MEGHNETRA_2Day_Implementation_Roadmap.pdf` for the complete, un-trimmed
 feature roadmap this project was built from).
+
+## 2b. Extended Pipeline Layers (Normalization + Correlation + Geospatial)
+
+On top of the core prototype above, the following pipeline layers were
+added, extending existing services rather than replacing them:
+
+- **Layer -1, Normalization** (`ai-service/app/normalization/`): a new
+  `POST /normalize` endpoint standardizes source labels to a controlled
+  vocabulary (`IMD`/`CITIZEN`/`SOCIAL_MEDIA`/`NEWS`/`API`), normalizes
+  timestamps to UTC ISO-8601, and maps structured category labels (e.g. an
+  explicit "Heavy Rain Warning" field) onto the existing canonical category
+  vocabulary — all before the existing classify/location/severity calls,
+  which are unchanged.
+- **Layer 3, Correlation**: the existing duplicate-detection/clustering
+  logic is reused as-is; the only addition is a configurable time window
+  (`CORRELATION_TIME_WINDOW_HOURS`) instead of a hardcoded constant.
+- **Layer 5, Geospatial Analysis** (`backend/src/services/geospatial.service.js`):
+  DBSCAN event clustering, hotspot detection, and convex-hull affected-area
+  estimation — implemented natively in **PostGIS** (`ST_ClusterDBSCAN`,
+  `ST_ConvexHull`, `ST_Area`) rather than adding a GeoPandas/Shapely
+  dependency, since PostGIS was already part of the architecture.
+- **Layer 6, Final Weather Event**: `cluster_id`, `is_hotspot`, and
+  `affected_area_km2` are now additive columns on `weather_events`, exposed
+  through the *existing* `GET /api/events` and `GET /api/events/:id`
+  endpoints (no breaking contract changes), plus a `FinalWeatherEvent`
+  Pydantic schema documenting the aggregated contract.
+- **Layer 7, Real-time**: no new transport was added — the existing
+  Socket.IO layer already satisfies this; the geospatial service simply
+  re-emits through it after each recompute.
+
+See `docs/PIPELINE_LAYERS.md` for the full changed-files list and
+per-layer status.
+
 
 ## 3. Project Structure
 

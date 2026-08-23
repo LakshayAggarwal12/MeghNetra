@@ -14,6 +14,10 @@ export interface WeatherEvent {
   lng: number;
   report_count?: string | number;
   source_count?: string | number;
+  // Layer 5 — Geospatial Analysis (DBSCAN clustering / hotspot / affected area)
+  cluster_id?: number | null;
+  is_hotspot?: boolean;
+  affected_area_km2?: string | number | null;
 }
 
 export interface EvidenceItem {

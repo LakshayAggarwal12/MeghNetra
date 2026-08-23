@@ -43,6 +43,14 @@ export default function EventMarker({ event }: { event: WeatherEvent }) {
             {event.report_count} report(s) · {event.source_count} source(s) · Confidence:{" "}
             {Number(event.confidence_score).toFixed(0)}%
           </div>
+          {event.is_hotspot && (
+            <div className="text-xs text-red-600 font-medium">
+              ⚠ Hotspot (cluster #{event.cluster_id})
+              {event.affected_area_km2 != null && Number(event.affected_area_km2) > 0
+                ? ` · ~${Number(event.affected_area_km2).toFixed(1)} km² affected`
+                : ""}
+            </div>
+          )}
           <Link to={`/events/${event.id}`} className="text-xs text-meghteal underline">
             View full evidence →
           </Link>

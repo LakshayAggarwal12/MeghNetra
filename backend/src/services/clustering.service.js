@@ -1,7 +1,11 @@
 const pool = require("../config/db");
 const aiClient = require("./aiClient.service");
+const env = require("../config/env");
 
-const TIME_WINDOW_HOURS = 12;
+// Layer 3 — Correlation: time-correlation window is configurable via
+// CORRELATION_TIME_WINDOW_HOURS (see backend/.env.example) rather than
+// hardcoded, per the "make the threshold configurable" requirement.
+const TIME_WINDOW_HOURS = env.CORRELATION_TIME_WINDOW_HOURS;
 const SIMILARITY_THRESHOLD = 0.6;
 const SEVERITY_RANK = { low: 1, moderate: 2, high: 3, severe: 4 };
 

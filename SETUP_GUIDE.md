@@ -64,6 +64,9 @@ cp .env.example .env
 
 Open `.env` and confirm `DATABASE_URL`, `REDIS_URL`, and `AI_SERVICE_URL`
 match your setup (the defaults work for a local install following Step 1).
+The `.env.example` also includes `CORRELATION_TIME_WINDOW_HOURS` and the
+`GEO_CLUSTER_*`/`GEO_HOTSPOT_*` geospatial-analysis thresholds (Layer 3 and
+Layer 5) — the defaults are fine for a demo, no changes needed.
 
 Apply the database schema and reference data:
 

@@ -98,7 +98,18 @@ export default function EventDetail() {
         <div className="flex gap-2 mt-3">
           <CategoryBadge category={event.category} />
           <SeverityChip severity={event.severity} />
+          {event.is_hotspot && (
+            <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 border border-red-300">
+              ⚠ Hotspot · Cluster #{event.cluster_id}
+            </span>
+          )}
         </div>
+        {event.is_hotspot && event.affected_area_km2 != null && Number(event.affected_area_km2) > 0 && (
+          <p className="text-xs text-red-600 mt-1">
+            Estimated affected area (geospatial cluster convex hull): ~
+            {Number(event.affected_area_km2).toFixed(1)} km²
+          </p>
+        )}
         <p className="text-xs text-gray-400 mt-2">
           First seen {new Date(event.first_seen_at).toLocaleString()} · Last updated{" "}
           {new Date(event.last_updated_at).toLocaleString()}

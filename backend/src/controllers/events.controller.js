@@ -34,6 +34,7 @@ const listEvents = asyncHandler(async (req, res) => {
 
   const { rows } = await pool.query(
     `SELECT e.id, e.category, e.secondary_categories, e.severity, e.status, e.confidence_score,
+            e.cluster_id, e.is_hotspot, e.affected_area_km2,
             e.first_seen_at, e.last_updated_at,
             l.city, l.state, l.locality, ST_Y(l.geom::geometry) AS lat, ST_X(l.geom::geometry) AS lng,
             (SELECT COUNT(*) FROM event_reports er WHERE er.event_id = e.id) AS report_count,
@@ -97,4 +98,22 @@ const listStates = asyncHandler(async (req, res) => {
   res.json({ states: rows.map((r) => r.state) });
 });
 
-module.exports = { listEvents, getEventDetail, listStates };
+// GET /api/events/meta/hotspots — Layer 5 output: clusters flagged as hotspots,
+// with centroid + affected area, for map overlay rendering.
+const listHotspots = asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(
+    `SELECT e.cluster_id,
+            COUNT(*) AS event_count,
+            MAX(e.affected_area_km2) AS affected_area_km2,
+            AVG(ST_Y(l.geom::geometry)) AS centroid_lat,
+            AVG(ST_X(l.geom::geometry)) AS centroid_lng
+     FROM weather_events e
+     JOIN locations l ON l.id = e.location_id
+     WHERE e.is_hotspot = true
+     GROUP BY e.cluster_id
+     ORDER BY event_count DESC`
+  );
+  res.json({ hotspots: rows });
+});
+
+module.exports = { listEvents, getEventDetail, listStates, listHotspots };

@@ -1,22 +1,45 @@
+const axios = require("axios");
+const env = require("../config/env");
 const { weatherApiAdapter } = require("./adapters/weatherApiAdapter");
 const { enqueueReport } = require("../services/enqueue.service");
 const logger = require("../utils/logger");
 
 /**
- * NOTE ON SIMULATION: This connector simulates a weather-API feed rather
- * than calling a real external API (OpenWeatherMap/IMD). This is a
- * deliberate, documented choice for the 2-day prototype (see the trimmed
- * implementation roadmap): a live demo must never depend on an external
- * API's uptime, quota, or network reachability from the judging venue.
- * The adapter boundary (weatherApiAdapter) is identical to what a real
- * API integration would use — swapping in a real HTTP call to
- * OpenWeatherMap/IMD later requires touching only this file.
+ * This connector supports two modes, controlled by WEATHER_API_PROVIDER:
+ *  - "openweathermap": calls the real OpenWeatherMap Current Weather API
+ *  - "simulated" (default): generates plausible conditions with no network
+ *    dependency, kept as a safety net if no key is configured or the demo
+ *    venue's network is unreliable.
+ * The adapter boundary (weatherApiAdapter) is identical either way, so
+ * nothing downstream in the pipeline needed to change.
  */
 
 const CITY_POOL = [
   "Delhi", "Mumbai", "Chennai", "Kolkata", "Bengaluru", "Hyderabad",
   "Jaipur", "Guwahati", "Patna", "Lucknow", "Pune", "Ahmedabad",
-  "Bhubaneswar", "Chandigarh", "Nagpur",
+  "Bhubaneswar", "Chandigarh", "Nagpur","Thiruvananthapuram",
+  "Bhopal",
+  "Ranchi",
+  "Raipur",
+  "Dehradun",
+  "Shimla",
+  "Srinagar",
+  "Jammu",
+  "Panaji",
+  "Gandhinagar",
+  "Kochi",
+  "Vijayawada",
+  "Visakhapatnam",
+  "Bhubaneswar",
+  "Cuttack",
+  "Agartala",
+  "Imphal",
+  "Shillong",
+  "Aizawl",
+  "Kohima",
+  "Itanagar",
+  "Gangtok",
+  "Dispur"
 ];
 
 const SCENARIOS = [
@@ -35,17 +58,11 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/**
- * Runs one polling cycle: picks 1-3 random cities and generates a plausible
- * weather condition report for each, weighted toward "interesting" (non-clear)
- * conditions so the live demo stays visually active.
- */
-async function pollWeatherApi() {
+async function pollSimulated() {
   const numCities = 1 + Math.floor(Math.random() * 3);
   const cities = [...CITY_POOL].sort(() => 0.5 - Math.random()).slice(0, numCities);
 
   for (const city of cities) {
-    // Bias toward non-clear scenarios (80% of the time) for a livelier demo.
     const pool = Math.random() < 0.8 ? SCENARIOS.filter((s) => s.category !== "clear") : SCENARIOS;
     const scenario = pick(pool);
 
@@ -58,9 +75,62 @@ async function pollWeatherApi() {
       });
       await enqueueReport(canonical);
     } catch (err) {
-      logger.error(`Weather API connector failed for ${city}:`, err.message);
+      logger.error(`Weather API connector (simulated) failed for ${city}:`, err.message);
     }
   }
+}
+
+/**
+ * Builds a natural-language sentence from OpenWeatherMap's response so the
+ * existing keyword-based classifier (ai-service) has enough context to
+ * match a category, rather than passing the bare one/two-word `description`
+ * field through unchanged.
+ */
+function describeConditions(city, owmData) {
+  const description = owmData.weather?.[0]?.description || "weather conditions";
+  const windKmh = owmData.wind?.speed != null ? owmData.wind.speed * 3.6 : null;
+  const rainMm = owmData.rain?.["1h"] ?? owmData.rain?.["3h"] ?? null;
+
+  let sentence = `${description.charAt(0).toUpperCase() + description.slice(1)} reported in ${city}.`;
+  if (windKmh != null && windKmh >= 40) sentence += ` Wind speeds around ${Math.round(windKmh)} km/h.`;
+  if (rainMm != null && rainMm > 0) sentence += ` Rainfall of approximately ${rainMm}mm recorded.`;
+
+  return { sentence, windKmh, rainMm };
+}
+
+async function pollOpenWeatherMap() {
+  for (const city of CITY_POOL) {
+    try {
+      const { data } = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
+        params: { q: `${city},IN`, appid: env.WEATHER_API_KEY, units: "metric" },
+        timeout: 8000,
+      });
+
+      const { sentence, windKmh, rainMm } = describeConditions(city, data);
+
+      const canonical = weatherApiAdapter({
+        city,
+        description: sentence,
+        windSpeedKmh: windKmh,
+        rainfallMm: rainMm,
+      });
+      await enqueueReport(canonical);
+    } catch (err) {
+      const detail = err.response ? `${err.response.status} ${JSON.stringify(err.response.data)}` : err.message;
+      logger.error(`OpenWeatherMap fetch failed for ${city}:`, detail);
+      // Never let one city's failure stop the rest of the poll cycle.
+    }
+  }
+}
+
+async function pollWeatherApi() {
+  if (env.WEATHER_API_PROVIDER === "openweathermap" && env.WEATHER_API_KEY) {
+    return pollOpenWeatherMap();
+  }
+  if (env.WEATHER_API_PROVIDER === "openweathermap" && !env.WEATHER_API_KEY) {
+    logger.warn("WEATHER_API_PROVIDER=openweathermap but WEATHER_API_KEY is not set — falling back to simulated data.");
+  }
+  return pollSimulated();
 }
 
 module.exports = { pollWeatherApi };

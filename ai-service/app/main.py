@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-from app.routers import classify, severity, location, similarity, verification
+from app.routers import classify, severity, location, similarity, verification, normalize
 
 load_dotenv()
 
@@ -47,3 +47,4 @@ app.include_router(severity.router, tags=["severity"])
 app.include_router(location.router, tags=["location"])
 app.include_router(similarity.router, tags=["similarity"])
 app.include_router(verification.router, tags=["verification"])
+app.include_router(normalize.router, tags=["normalization"])

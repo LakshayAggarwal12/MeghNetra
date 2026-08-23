@@ -130,3 +130,16 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   timestamp TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_audit_target ON audit_logs(target_type, target_id);
+
+-- ============================================================
+-- Additive columns for the Normalization (Layer -1) and
+-- Geospatial Analysis (Layer 5) / Final Weather Event (Layer 6) additions.
+-- Idempotent: safe to re-run against an existing database.
+-- ============================================================
+
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS standardized_source TEXT; -- IMD/CITIZEN/SOCIAL_MEDIA/NEWS/API
+
+ALTER TABLE weather_events ADD COLUMN IF NOT EXISTS cluster_id INTEGER;
+ALTER TABLE weather_events ADD COLUMN IF NOT EXISTS is_hotspot BOOLEAN DEFAULT false;
+ALTER TABLE weather_events ADD COLUMN IF NOT EXISTS affected_area_km2 NUMERIC;
+CREATE INDEX IF NOT EXISTS idx_events_cluster ON weather_events(cluster_id);
