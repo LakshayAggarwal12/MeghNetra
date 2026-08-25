@@ -36,11 +36,11 @@ html.compact {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.35);
+  background: rgba(91, 101, 151, 0.35);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.55);
+  background: rgba(91, 101, 151, 0.55);
 }
 
 .leaflet-container {
@@ -54,8 +54,8 @@ html.dark .leaflet-tile {
 
 html.dark .leaflet-popup-content-wrapper,
 html.dark .leaflet-popup-tip {
-  background: #1e293b;
-  color: #f1f5f9;
+  background: #232a4a;
+  color: #eaedf9;
 }
 
 /* Subtle, consistent transitions for interactive surfaces app-wide */

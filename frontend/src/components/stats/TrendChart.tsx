@@ -19,8 +19,8 @@ const COLORS: Record<string, string> = {
 export default function TrendChart() {
   const [data, setData] = useState<any[]>([]);
   const { theme } = useSettings();
-  const axisColor = theme === "dark" ? "#94a3b8" : "#64748b";
-  const gridColor = theme === "dark" ? "#334155" : "#e2e8f0";
+  const axisColor = theme === "dark" ? "#8891c2" : "#5b6597";
+  const gridColor = theme === "dark" ? "#323a5e" : "#dde3f4";
 
   useEffect(() => {
     client
@@ -50,11 +50,11 @@ export default function TrendChart() {
           <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: axisColor }} />
           <Tooltip
             contentStyle={{
-              background: theme === "dark" ? "#1e293b" : "#ffffff",
+              background: theme === "dark" ? "#232a4a" : "#ffffff",
               border: "1px solid " + gridColor,
               borderRadius: 8,
               fontSize: 12,
-              color: theme === "dark" ? "#f1f5f9" : "#0f172a",
+              color: theme === "dark" ? "#eaedf9" : "#141829",
             }}
           />
           <Legend wrapperStyle={{ fontSize: 11 }} />
