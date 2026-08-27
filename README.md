@@ -171,4 +171,3 @@ See `SETUP_GUIDE.md` for exact run commands.
   `docs/SCOPE_DECISIONS.md`), which lets you answer "why didn't you do X"
   questions with a reasoned trade-off instead of an excuse.
 
-See `docs/DEMO_SCRIPT.md` for a suggested walkthrough order for judges.
