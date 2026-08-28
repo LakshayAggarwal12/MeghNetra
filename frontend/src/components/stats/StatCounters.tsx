@@ -17,11 +17,9 @@ export default function StatCounters() {
   useEffect(() => {
     fetchSummary();
     const interval = setInterval(fetchSummary, 30000); // safety-net refetch
-
     const socket = getSocket();
     const onUpdate = (_event: WeatherEvent) => fetchSummary();
     socket.on("event:update", onUpdate);
-
     return () => {
       clearInterval(interval);
       socket.off("event:update", onUpdate);
@@ -30,9 +28,9 @@ export default function StatCounters() {
 
   if (!summary) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+          <div key={i} className="h-24 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
         ))}
       </div>
     );
@@ -51,18 +49,31 @@ export default function StatCounters() {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {cards.map((c) => (
         <div
           key={c.label}
-          className={`relative overflow-hidden rounded-xl p-4 text-white shadow-card hover:shadow-card-hover
+          className={`group relative overflow-hidden rounded-2xl p-5 text-white
+                      shadow-card hover:shadow-card-hover hover:-translate-y-1
                       transition-surface bg-gradient-to-br ${c.accent}`}
         >
-          <c.icon className="absolute -right-2 -bottom-2 w-16 h-16 opacity-15" />
-          <div className="relative">
-            <div className="text-2xl font-bold tabular-nums">{c.value}</div>
-            <div className="text-xs opacity-90 font-medium">{c.label}</div>
+          {/* faded large icon in background */}
+          <c.icon className="absolute -right-3 -bottom-3 w-20 h-20 opacity-10 group-hover:opacity-15 group-hover:scale-110 transition-transform duration-300" />
+
+          {/* small icon badge */}
+          <div className="relative flex items-center justify-between mb-3">
+            <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <c.icon className="w-5 h-5" />
+            </div>
           </div>
+
+          <div className="relative">
+            <div className="text-3xl font-bold tabular-nums tracking-tight">{c.value}</div>
+            <div className="text-xs opacity-90 font-medium mt-1">{c.label}</div>
+          </div>
+
+          {/* bottom accent line */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20" />
         </div>
       ))}
     </div>

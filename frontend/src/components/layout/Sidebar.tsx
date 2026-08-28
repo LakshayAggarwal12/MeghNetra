@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 export default function Sidebar({ open }: { open: boolean }) {
   return (
     <aside
-      className={`fixed md:sticky top-0 left-0 h-screen z-30 bg-meghblue text-white flex flex-col
+      className={`fixed md:sticky top-0 left-0 h-screen z-30 bg-gradient-to-b from-slate-900 via-meghblue to-meghblue text-white flex flex-col
         transition-all duration-300 ease-smooth overflow-hidden
         ${open ? "w-64" : "w-0 md:w-20"}`}
     >
