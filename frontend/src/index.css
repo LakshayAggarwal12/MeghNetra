@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
+.leaflet-popup-content-wrapper { border-radius: 1rem !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important; }
+.leaflet-popup-content { margin: 14px 16px !important; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,11 +18,11 @@ html.dark {
 body {
   margin: 0;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  @apply bg-meghsurface-light text-slate-800 transition-colors duration-300;
+  @apply bg-slate-50 text-slate-800 transition-colors duration-300;
 }
 
 html.dark body {
-  @apply bg-meghsurface-dark text-slate-100;
+  @apply bg-slate-950 text-slate-100;
 }
 
 /* Compact mode shrinks vertical rhythm across the app without touching component logic */
@@ -32,30 +35,37 @@ html.compact {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(91, 101, 151, 0.35);
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(91, 101, 151, 0.55);
+  background: rgba(148, 163, 184, 0.6);
 }
 
 .leaflet-container {
   width: 100%;
   height: 100%;
+  background: transparent !important;
 }
 
+/* Cinematic Dark Mode Map Styling */
 html.dark .leaflet-tile {
-  filter: brightness(0.85) invert(1) contrast(0.9) hue-rotate(180deg) saturate(0.6);
+  filter: brightness(0.75) invert(1) contrast(0.9) hue-rotate(200deg) saturate(0.5);
 }
 
 html.dark .leaflet-popup-content-wrapper,
 html.dark .leaflet-popup-tip {
-  background: #232a4a;
-  color: #eaedf9;
+  background: rgba(15, 23, 42, 0.9) !important;
+  backdrop-filter: blur(16px);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Subtle, consistent transitions for interactive surfaces app-wide */
@@ -85,4 +95,23 @@ html.dark .leaflet-popup-tip {
 
 .animate-pulse-dot {
   animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Creative Shimmer Animation for Loaders & Cards */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s infinite linear;
 }
