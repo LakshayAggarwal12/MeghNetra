@@ -1,6 +1,7 @@
-import React from "react";
-import { Menu, Moon, Sun, Wifi, WifiOff, Radio } from "lucide-react";
+import React, { useState } from "react";
+import { Menu, Moon, Sun, LogOut, ChevronDown, UserCircle2, ShieldCheck } from "lucide-react";
 import { useSettings } from "../../context/SettingsContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface Props {
   title: string;
@@ -11,6 +12,14 @@ interface Props {
 
 export default function Topbar({ title, subtitle, connected, onToggleSidebar }: Props) {
   const { theme, toggleTheme } = useSettings();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    await logout();
+    window.location.href = "/";
+  };
 
   return (
     <header
@@ -53,7 +62,7 @@ export default function Topbar({ title, subtitle, connected, onToggleSidebar }: 
           {connected ? "Live Stream" : "Reconnecting..."}
         </span>
 
-        {/* Theme Toggle Button */}
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
           className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 
@@ -70,6 +79,58 @@ export default function Topbar({ title, subtitle, connected, onToggleSidebar }: 
             <Sun className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
           )}
         </button>
+
+        {/* User Menu */}
+        {isAuthenticated && user ? (
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen((v) => !v)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/60
+                         border border-slate-200/60 dark:border-white/5 shadow-sm
+                         text-slate-700 dark:text-slate-200 text-sm font-medium
+                         hover:bg-cyan-500/10 hover:text-cyan-700 dark:hover:text-cyan-300 transition-all active:scale-95"
+              aria-label="User menu"
+              aria-expanded={userMenuOpen}
+            >
+              {user.role === "admin" ? (
+                <ShieldCheck className="w-4 h-4 text-sky-500" />
+              ) : (
+                <UserCircle2 className="w-4 h-4" />
+              )}
+              <span className="hidden md:block max-w-[120px] truncate">{user.name}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {userMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)} />
+                {/* Dropdown */}
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl z-20 overflow-hidden animate-fade-in">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                    <span className={`mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                      user.role === "admin"
+                        ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                    }`}>
+                      {user.role === "admin" && <ShieldCheck className="w-2.5 h-2.5" />}
+                      {user.role}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     </header>
   );

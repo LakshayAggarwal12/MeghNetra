@@ -1,33 +1,8 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
-const env = require("../config/env");
 const { asyncHandler } = require("../middleware/error.middleware");
 const socketService = require("../services/socket.service");
-
-const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Email and password required" } });
-  }
-
-  const { rows } = await pool.query(`SELECT * FROM users WHERE email = $1 AND role = 'admin'`, [email]);
-  if (rows.length === 0) {
-    return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "Invalid credentials" } });
-  }
-
-  const user = rows[0];
-  const match = await bcrypt.compare(password, user.password_hash);
-  if (!match) {
-    return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "Invalid credentials" } });
-  }
-
-  const token = jwt.sign({ sub: user.id, email: user.email, role: user.role }, env.JWT_SECRET, {
-    expiresIn: "12h",
-  });
-
-  res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
-});
+// login is now handled by auth.controller; re-exported here for any legacy imports.
+const { login } = require("./auth.controller");
 
 // GET /api/admin/queue — pending/flagged/unverified items needing review
 const getQueue = asyncHandler(async (req, res) => {

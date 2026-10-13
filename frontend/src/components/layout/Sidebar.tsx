@@ -1,18 +1,22 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, Map, Bell, ShieldCheck, SendHorizontal, Search, Settings, CloudDrizzle, Server } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/map", label: "Map", icon: Map },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/city-lookup", label: "City Lookup", icon: Search },
   { to: "/report", label: "Submit Report", icon: SendHorizontal },
-  { to: "/admin", label: "Admin Panel", icon: ShieldCheck },
+  { to: "/admin", label: "Admin Panel", icon: ShieldCheck, adminOnly: true },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar({ open }: { open: boolean }) {
+  const { isAdmin } = useAuth();
+  const visibleNavItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
+
   return (
     <aside
       className={`fixed md:sticky top-0 left-0 h-screen z-30 bg-slate-950/80 backdrop-blur-2xl border-r border-white/5 text-white flex flex-col
@@ -35,7 +39,7 @@ export default function Sidebar({ open }: { open: boolean }) {
       </div>
 
       <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+        {visibleNavItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}

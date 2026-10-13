@@ -6,7 +6,7 @@ import { useConnectionStatus } from "../../hooks/useConnectionStatus";
 import { useSettings } from "../../context/SettingsContext";
 
 const PAGE_META: Record<string, { title: string; subtitle?: string }> = {
-  "/": { title: "Dashboard", subtitle: "National weather-event overview" },
+  "/dashboard": { title: "Dashboard", subtitle: "National weather-event overview" },
   "/map": { title: "Live Map", subtitle: "India-wide event visualization" },
   "/alerts": { title: "Alerts", subtitle: "High-severity and hotspot events" },
   "/city-lookup": { title: "City Lookup", subtitle: "On-demand weather & news search" },
