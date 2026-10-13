@@ -2,7 +2,7 @@
 Severity estimation.
 
 Approach: weighted keyword-intensity scoring, blended with numeric
-signals (wind speed, rainfall) when the source provides them — numeric
+signals (wind speed, rainfall) when the source provides them - numeric
 weather-API data is the strongest, most credible signal and overrides
 text heuristics when present (see roadmap Feature 9).
 """

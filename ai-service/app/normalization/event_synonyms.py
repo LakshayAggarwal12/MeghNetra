@@ -8,7 +8,7 @@ source already supplies an explicit category-like label (e.g. an IMD
 bulletin field, or a citizen-app dropdown value) and that label needs to
 be canonicalized to the SAME category vocabulary already used across the
 project (see ai-service/app/data/keywords.json and the seeded
-event_categories table) — rather than inventing a parallel vocabulary.
+event_categories table) - rather than inventing a parallel vocabulary.
 
 Returns None when no confident structured mapping exists, so callers fall
 through to the existing ML classifier for free text.

@@ -9,7 +9,7 @@ design (Section 9.3):
   - category agreement     (do the two reports share a category?)
 
 TF-IDF + cosine similarity is used instead of sentence-transformer
-embeddings — see the trimmed 2-day scope decision in the implementation
+embeddings - see the trimmed 2-day scope decision in the implementation
 roadmap (Feature 10). It requires no model download, runs instantly on
 CPU, and is sufficient to recognize paraphrased reports of the same event.
 """
@@ -18,7 +18,7 @@ from datetime import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Fusion weights — tunable, documented starting point per the blueprint.
+# Fusion weights - tunable, documented starting point per the blueprint.
 W_TEXT = 0.40
 W_GEO = 0.25
 W_TIME = 0.20

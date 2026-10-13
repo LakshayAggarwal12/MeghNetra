@@ -5,7 +5,7 @@ Approach (trimmed 2-day scope): match city/locality names mentioned in the
 report text, or supplied as a location_hint, against a curated CSV of
 Indian cities. This avoids a live NER model and avoids any external
 network dependency (Nominatim) that could fail or rate-limit during a
-live demo. It is a deliberate, documented simplification — see the
+live demo. It is a deliberate, documented simplification - see the
 MEGHNETRA implementation roadmap, Feature 8 (trimmed-scope version).
 """
 import csv

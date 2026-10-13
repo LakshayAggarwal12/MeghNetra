@@ -33,7 +33,7 @@ async def require_internal_key(request: Request, call_next):
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    # Never leak raw tracebacks to the caller (Feature 26 — error handling).
+    # Never leak raw tracebacks to the caller (Feature 26 - error handling).
     return JSONResponse(status_code=500, content={"detail": f"Internal AI-service error: {str(exc)}"})
 
 

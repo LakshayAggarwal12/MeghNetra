@@ -1,11 +1,11 @@
-# Frontend UI/UX Redesign — Summary & Changed Files
+# Frontend UI/UX Redesign - Summary & Changed Files
 
 ## 1. Summary of UI Changes
 
 **No backend code, API endpoints, database logic, AI/ML services, data flow,
 or existing API calls were modified for this redesign.** Every component
 below still calls the exact same endpoints with the exact same request/
-response shapes as before — only presentation changed.
+response shapes as before - only presentation changed.
 
 - **New app shell**: a persistent sidebar (collapsible, icon-only when
   collapsed) + top bar replace the old per-page inline headers. Navigation
@@ -20,7 +20,7 @@ response shapes as before — only presentation changed.
 - **Modern stat cards**: gradient, icon-backed counters replacing flat
   color blocks.
 - **Icon system**: introduced `lucide-react` throughout (categories,
-  severity, status, nav items) for faster visual scanning — e.g. a flame
+  severity, status, nav items) for faster visual scanning - e.g. a flame
   icon for hotspots, shield icons for verification status.
 - **Improved map**: cleaner zoom control placement, a severity legend
   overlay, dashed hotspot cluster circles with tooltips, and a
@@ -35,12 +35,12 @@ response shapes as before — only presentation changed.
   separately, per your ingestion request) to let a user fetch live
   weather + RSS data for any city on demand.
 - **Settings page**: theme, compact mode, map style, and a notification-
-  indicator toggle — all frontend-only preferences stored in
+  indicator toggle - all frontend-only preferences stored in
   `localStorage`, changing nothing about how data is fetched or verified.
 - **Subtle transitions**: consistent `transition-surface` utility class
   (color/shadow/transform) applied to interactive elements; a shared
   fade-in animation for page/content mounts. No animation library was
-  added — everything is plain Tailwind + CSS keyframes.
+  added - everything is plain Tailwind + CSS keyframes.
 - **Responsive layout**: sidebar collapses on narrow viewports; grids
   reflow from multi-column to single-column on tablet/mobile widths
   (unchanged Tailwind breakpoints, just applied more consistently).
@@ -50,7 +50,7 @@ response shapes as before — only presentation changed.
 | File | Change |
 |---|---|
 | `frontend/tailwind.config.js` | Added `darkMode: "class"`, extended color palette, shadows, font family |
-| `frontend/package.json` | Added `lucide-react` (icons) — no other new dependencies |
+| `frontend/package.json` | Added `lucide-react` (icons) - no other new dependencies |
 | `frontend/src/index.css` | Dark-mode base styles, Inter font import, scrollbar styling, shared transition/animation utility classes |
 | `frontend/src/main.tsx` | Wrapped app in new `SettingsProvider` |
 | `frontend/src/App.tsx` | Routes now nested under a new `AppLayout`; added `/map`, `/alerts`, `/city-lookup`, `/settings` routes |
@@ -76,15 +76,15 @@ response shapes as before — only presentation changed.
 | `frontend/src/components/layout/AppLayout.tsx` | Shell wrapping Sidebar + Topbar + routed page content |
 | `frontend/src/components/layout/Sidebar.tsx` | Collapsible navigation sidebar |
 | `frontend/src/components/layout/Topbar.tsx` | Top bar: page title, live/reconnecting indicator, theme toggle, sidebar toggle |
-| `frontend/src/hooks/useConnectionStatus.ts` | Reads the *existing* socket's connection state for the Topbar indicator — opens no new connection |
+| `frontend/src/hooks/useConnectionStatus.ts` | Reads the *existing* socket's connection state for the Topbar indicator - opens no new connection |
 | `frontend/src/pages/Settings.tsx` | New Settings page |
 | `frontend/src/pages/MapFullView.tsx` | Full-screen map page, composed from existing `MapView`/`FilterBar`/`useLiveEvents` |
-| `frontend/src/pages/Alerts.tsx` | Client-side filtered view (severe/hotspot/flagged) over existing event data — no new API call |
+| `frontend/src/pages/Alerts.tsx` | Client-side filtered view (severe/hotspot/flagged) over existing event data - no new API call |
 | `frontend/src/pages/CityLookup.tsx` | New page calling the newly added `POST /api/search/city` endpoint |
 
 ## Verification performed
 
-- `npx tsc --noEmit` — clean, zero type errors across the full change set
-- `npx vite build` — production build succeeds with no warnings
+- `npx tsc --noEmit` - clean, zero type errors across the full change set
+- `npx vite build` - production build succeeds with no warnings
 - No existing API call signature, response field, route path, or backend
   file was touched by this redesign pass.

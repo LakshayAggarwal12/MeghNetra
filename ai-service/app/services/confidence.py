@@ -8,7 +8,7 @@ Implements the blueprint's exact evidence-fusion formula (Section 10.3):
              + 0.15*location_consistency
              + 0.10*temporal_consistency
 
-The weights are a documented, tunable starting point — not a black box.
+The weights are a documented, tunable starting point - not a black box.
 A hard override forces status='contradicted' when the caller explicitly
 flags a direct contradiction against objective weather-API data,
 regardless of the numeric score, matching the blueprint's distinct

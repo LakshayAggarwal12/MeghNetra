@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS sources (
 );
 
 -- ============================================================
--- Users (admin only in this prototype — citizen reports are anonymous)
+-- Users (admin only in this prototype - citizen reports are anonymous)
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS users (

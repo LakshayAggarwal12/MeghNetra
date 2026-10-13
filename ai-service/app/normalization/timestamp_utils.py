@@ -3,10 +3,10 @@ Timestamp normalization -> UTC ISO 8601.
 
 Stdlib-only (no new dependency such as python-dateutil), handling the
 formats realistically seen across MEGHNETRA's source types:
-  - already-ISO-8601 (with or without a timezone offset) — the common case,
+  - already-ISO-8601 (with or without a timezone offset) - the common case,
     since the existing Node adapters already emit this
   - a bare "YYYY-MM-DD HH:MM:SS" (space instead of "T")
-  - Unix epoch seconds/milliseconds (int or numeric string) — common in raw
+  - Unix epoch seconds/milliseconds (int or numeric string) - common in raw
     third-party feed payloads
 Falls back to "now" (UTC) if the input cannot be parsed, rather than raising,
 since a report should never be dropped purely because of a timestamp format.
@@ -53,5 +53,5 @@ def to_utc_iso8601(raw) -> str:
         except ValueError:
             continue
 
-    # Unparseable — fall back rather than failing the whole report.
+    # Unparseable - fall back rather than failing the whole report.
     return datetime.now(timezone.utc).isoformat()

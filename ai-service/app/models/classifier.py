@@ -3,7 +3,7 @@ Weather-event classification.
 
 Approach: rule-based keyword matching over a curated lexicon.
 This is intentionally simple and fully explainable, appropriate for a
-2-day prototype build (see MEGHNETRA implementation roadmap, Feature 7 —
+2-day prototype build (see MEGHNETRA implementation roadmap, Feature 7 -
 trimmed-scope version). A trained scikit-learn classifier can be dropped
 in later as a fallback for text with no keyword hits, without changing
 the API contract of `classify_text()`.

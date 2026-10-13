@@ -1,4 +1,4 @@
-# MEGHNETRA — Setup Guide
+# MEGHNETRA - Setup Guide
 
 Follow these steps in order on a fresh machine. Total time: ~15-20 minutes
 (most of it is dependency installation).
@@ -21,7 +21,7 @@ redis-server --daemonize yes
 
 (If you already have Postgres/Redis running, skip this section.)
 
-## Step 1 — Create the database
+## Step 1 - Create the database
 
 ```bash
 sudo -u postgres psql -c "CREATE USER meghnetra WITH PASSWORD 'meghnetra';"
@@ -36,7 +36,7 @@ Verify PostGIS is active:
 psql "postgresql://meghnetra:meghnetra@localhost:5432/meghnetra" -c "SELECT PostGIS_Version();"
 ```
 
-## Step 2 — AI Service (Python/FastAPI)
+## Step 2 - AI Service (Python/FastAPI)
 
 ```bash
 cd ai-service
@@ -52,7 +52,7 @@ curl http://localhost:8000/health
 # {"status":"ok","service":"meghnetra-ai-service"}
 ```
 
-## Step 3 — Backend (Node.js/Express)
+## Step 3 - Backend (Node.js/Express)
 
 In a **new terminal**:
 
@@ -66,7 +66,7 @@ Open `.env` and confirm `DATABASE_URL`, `REDIS_URL`, and `AI_SERVICE_URL`
 match your setup (the defaults work for a local install following Step 1).
 The `.env.example` also includes `CORRELATION_TIME_WINDOW_HOURS` and the
 `GEO_CLUSTER_*`/`GEO_HOTSPOT_*` geospatial-analysis thresholds (Layer 3 and
-Layer 5) — the defaults are fine for a demo, no changes needed.
+Layer 5) - the defaults are fine for a demo, no changes needed.
 
 Apply the database schema and reference data:
 
@@ -88,10 +88,10 @@ curl http://localhost:5000/api/health
 ```
 
 You should immediately see log lines showing the simulated weather-API
-connector enqueuing reports — this is expected and confirms ingestion is
+connector enqueuing reports - this is expected and confirms ingestion is
 running.
 
-## Step 4 — Queue Worker
+## Step 4 - Queue Worker
 
 The worker is a **separate process** from the API server (this is what lets
 report submission stay fast while AI processing happens in the background).
@@ -113,7 +113,7 @@ If you don't see these within ~45 seconds, check that the AI service
 (Step 2) is reachable and that `INTERNAL_API_KEY` matches between
 `backend/.env` and `ai-service/.env`.
 
-## Step 5 — Seed Demo Data (recommended before your first demo)
+## Step 5 - Seed Demo Data (recommended before your first demo)
 
 With the backend, worker, and AI service all running, in a **new terminal**:
 
@@ -123,16 +123,16 @@ npm run db:seed
 ```
 
 This clears existing report/event data and replays ~57 realistic reports
-through the real pipeline — including a guaranteed **Verified** multi-source
+through the real pipeline - including a guaranteed **Verified** multi-source
 flood event, a guaranteed **Contradicted** event, and a guaranteed
-**Unverified** single report — plus ~50 bulk historical reports spread
+**Unverified** single report - plus ~50 bulk historical reports spread
 across 6 days and 18 cities, so the dashboard looks like a live national
 platform from the moment you open it.
 
 This can take 1-2 minutes since each report goes through the full
 classify → locate → severity → cluster → verify pipeline for realism.
 
-## Step 6 — Frontend (React)
+## Step 6 - Frontend (React)
 
 In a **final new terminal**:
 
@@ -174,12 +174,12 @@ Open the URL Vite prints (typically `http://localhost:5173`).
 - **401 Unauthorized from FastAPI**: `INTERNAL_API_KEY` in `backend/.env`
   and `ai-service/.env` must be identical.
 - **Events never leave "unverified"**: this is often correct behavior for a
-  single, uncorroborated citizen report — submit 2-3 similarly-worded
+  single, uncorroborated citizen report - submit 2-3 similarly-worded
   reports about the same fictional event to see clustering/verification
   produce a higher-confidence status.
 - **Map markers missing**: check the worker terminal for errors; a report
   stuck in `pending` status usually means the AI service was unreachable
-  when it was processed — it will retry automatically (3 attempts with
+  when it was processed - it will retry automatically (3 attempts with
   backoff).
 - **Port already in use**: something else is using 5000/8000/5173/5432/6379
-  — stop it or change the relevant port in `.env`.
+  - stop it or change the relevant port in `.env`.

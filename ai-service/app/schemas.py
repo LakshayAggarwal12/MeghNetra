@@ -96,7 +96,7 @@ class VerificationResponse(BaseModel):
 
 
 # ============================================================
-# Layer -1: Normalization — common schema
+# Layer -1: Normalization - common schema
 # ============================================================
 
 class NormalizeRequest(BaseModel):
@@ -114,7 +114,7 @@ class NormalizeResponse(BaseModel):
 
 
 # ============================================================
-# Layer 6: Final Weather Event — aggregated output contract
+# Layer 6: Final Weather Event - aggregated output contract
 # ============================================================
 
 class FinalWeatherEvent(BaseModel):
